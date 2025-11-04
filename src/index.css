@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+  background-color: #f8f9fa; /* Bootstrap light */
+  color: #212529;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/***** Safe top spacing under sticky header *****/
+@media (min-width: 576px) {
+  .page-under-header {
+    padding-top: 20px;
+  }
+}
