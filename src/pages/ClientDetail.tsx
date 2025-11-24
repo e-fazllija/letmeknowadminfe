@@ -5,7 +5,6 @@ import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
 import { getClient } from '../lib/api'
 import type { Client, Subscription } from '../lib/api'
-import logoFull from '@/assets/logo-transparent-dark.png'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -58,13 +57,6 @@ export default function ClientDetail() {
                       </span>
                     </div>
                   </div>
-                  <img
-                    src={logoFull}
-                    alt="LetMeKnow"
-                    width={160}
-                    height={50}
-                    style={{ objectFit: 'contain' }}
-                  />
                 </div>
               </div>
 
