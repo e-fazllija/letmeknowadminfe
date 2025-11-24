@@ -4,32 +4,36 @@ import logo from '@/assets/logo-superuser.svg'
 
 export default function Header() {
   const { user, logout } = useAuth()
+
   return (
-    <header
-      className="bg-white border-bottom position-sticky top-0"
-      style={{ zIndex: 1030 }}
-    >
-      <div
-        className="container d-flex align-items-center justify-content-between"
-        style={{ minHeight: 76, paddingTop: 2, paddingBottom: 2 }}
-      >
-        <Link to="/clients" className="d-flex align-items-center text-decoration-none">
-          <img
-            src={logo}
-            alt="LetMeKnow Superuser"
-            width={40}
-            height={40}
-            className="me-2"
-            style={{ display: 'block', objectFit: 'contain', borderRadius: 8 }}
-          />
-          <span className="fw-semibold text-dark">LetMeKnow • Superuser</span>
+    <header className="app-header">
+      <div className="container header-bar">
+        <Link to="/clients" className="brand-link">
+          <div className="brand-avatar">
+            <img
+              src={logo}
+              alt="LetMeKnow Superuser"
+              width={28}
+              height={28}
+              style={{ display: 'block', objectFit: 'contain' }}
+            />
+          </div>
+          <div className="lh-sm">
+            <div className="brand-eyebrow">Superuser</div>
+            <div className="brand-title">LetMeKnow</div>
+          </div>
         </Link>
 
         <div className="d-flex align-items-center gap-3">
-          <small className="text-muted">
-            {user?.email} · {user?.role}
-          </small>
-          <button className="btn btn-sm btn-outline-secondary" onClick={logout}>
+          <div className="user-chip">
+            <span className="user-dot" aria-hidden="true" />
+            <div className="lh-sm">
+              <div className="label-muted">Connesso</div>
+              <div className="fw-semibold">{user?.email || 'Utente'}</div>
+              <small className="text-muted text-uppercase">{user?.role || 'Role'}</small>
+            </div>
+          </div>
+          <button className="btn btn-sm btn-dark rounded-pill px-3" onClick={logout}>
             Logout
           </button>
         </div>

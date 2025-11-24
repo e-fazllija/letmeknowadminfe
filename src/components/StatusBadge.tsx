@@ -13,6 +13,5 @@ export default function StatusBadge({ status }: { status: Subscription['status']
     status === 'PAST_DUE' ? 'PAST_DUE' :
     status
 
-  return <span className={`badge text-bg-${variant}`}>{label}</span>
+  return <span className={`status-pill status-pill-${variant}`}>{label}</span>
 }
-

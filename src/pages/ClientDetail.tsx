@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap'
-import { getClient } from '../lib/api'
-import type { Client, Subscription } from '../lib/api'
 import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
+import { getClient } from '../lib/api'
+import type { Client, Subscription } from '../lib/api'
+import logoFull from '@/assets/logo-transparent-dark.png'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -21,44 +22,68 @@ export default function ClientDetail() {
       .finally(() => setLoading(false))
   }, [id])
 
+  const mainStatus = client?.subscriptions?.[0]?.status
+
   return (
     <>
       <Header />
-      <div className="container" style={{ paddingTop: 20 }}>
-        <div style={{ fontSize: '0.95rem' }}>
-          <div className="d-flex justify-content-between align-items-center mb-3 px-1">
-            <Button variant="outline-dark" onClick={() => navigate('/clients')}>← Indietro</Button>
-            <div></div>
+      <div className="page-shell">
+        <div className="container">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Button variant="outline-dark" className="rounded-pill" onClick={() => navigate('/clients')}>
+              {'<'} Indietro
+            </Button>
           </div>
 
           {loading && (
             <div className="d-flex align-items-center gap-2 px-1">
               <Spinner animation="border" size="sm" />
-              <span>Caricamento cliente…</span>
+              <span>Caricamento cliente...</span>
             </div>
           )}
           {error && <Alert variant="danger" className="px-3">{error}</Alert>}
 
           {client && (
             <>
-              <h4 className="fw-semibold mb-3 px-1">{client.companyName}</h4>
+              <div className="page-hero mb-3">
+                <div className="d-flex align-items-start justify-content-between flex-wrap gap-3">
+                  <div>
+                    <div className="eyebrow">Scheda cliente</div>
+                    <h3 className="fw-bold mb-1">{client.companyName}</h3>
+                    <div className="d-flex align-items-center flex-wrap gap-2">
+                      {mainStatus && <StatusBadge status={mainStatus} />}
+                      <span className="badge-soft">ID {client.id}</span>
+                      <span className="text-secondary small">
+                        Creato il {new Date(client.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  <img
+                    src={logoFull}
+                    alt="LetMeKnow"
+                    width={160}
+                    height={50}
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
+              </div>
 
-              <Row className="g-3 px-1">
+              <Row className="g-3">
                 <Col md={6}>
-                  <Card className="shadow-sm">
+                  <Card className="info-card h-100">
                     <Card.Body>
                       <Card.Title className="h6 mb-3">Contatti</Card.Title>
-                      <Row>
-                        <Col sm={12} className="mb-2">
+                      <Row className="gy-2">
+                        <Col sm={12}>
                           <strong>Email contatto:</strong> {client.contactEmail}
                         </Col>
-                        <Col sm={6} className="mb-2">
-                          <strong>Stato:</strong> {client.status}
+                        <Col sm={6}>
+                          <strong>Stato cliente:</strong> {client.status}
                         </Col>
-                        <Col sm={6} className="mb-2">
+                        <Col sm={6}>
                           <strong>Dipendenti:</strong> {client.employeeRange}
                         </Col>
-                        <Col sm={6} className="mb-2">
+                        <Col sm={6}>
                           <strong>Creato il:</strong> {new Date(client.createdAt).toLocaleDateString()}
                         </Col>
                       </Row>
@@ -66,18 +91,18 @@ export default function ClientDetail() {
                   </Card>
                 </Col>
                 <Col md={6}>
-                  <Card className="shadow-sm">
+                  <Card className="info-card h-100">
                     <Card.Body>
                       <Card.Title className="h6 mb-3">Fatturazione</Card.Title>
-                      <Row>
-                        <Col sm={6} className="mb-2">
+                      <Row className="gy-2">
+                        <Col sm={6}>
                           <strong>P. IVA:</strong> {client.billingTaxId || '-'}
                         </Col>
-                        <Col sm={6} className="mb-2">
+                        <Col sm={6}>
                           <strong>Email fatturazione:</strong> {client.billingEmail || '-'}
                         </Col>
-                        <Col sm={12} className="mb-2">
-                          <strong>Località:</strong> {client.billingCity || '-'} {client.billingCountry || ''}
+                        <Col sm={12}>
+                          <strong>Localita:</strong> {client.billingCity || '-'} {client.billingCountry || ''}
                         </Col>
                       </Row>
                     </Card.Body>
@@ -85,10 +110,17 @@ export default function ClientDetail() {
                 </Col>
               </Row>
 
-              <Card className="mt-3 px-1 border-0">
+              <Card className="table-card mt-3 border-0">
                 <Card.Body className="p-0">
-                  <h6 className="mb-3">Sottoscrizioni</h6>
-                  <SubscriptionsTable subs={client.subscriptions} />
+                  <div className="d-flex align-items-center justify-content-between px-3 pt-3">
+                    <div>
+                      <div className="eyebrow mb-1">Sottoscrizioni</div>
+                      <h6 className="mb-0">Dettagli pagamenti e rinnovi</h6>
+                    </div>
+                  </div>
+                  <div className="table-responsive p-3">
+                    <SubscriptionsTable subs={client.subscriptions} />
+                  </div>
                 </Card.Body>
               </Card>
             </>
@@ -102,7 +134,7 @@ export default function ClientDetail() {
 function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
   if (!subs || subs.length === 0) return <em>Nessuna sottoscrizione</em>
   return (
-    <Table bordered responsive striped className="align-middle">
+    <Table bordered responsive striped className="align-middle mb-0">
       <thead className="table-light">
         <tr>
           <th>ID</th>
