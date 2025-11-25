@@ -52,11 +52,14 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 1030;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--ink-300);
-  box-shadow: 0 6px 30px rgba(15, 23, 42, 0.08);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(226, 252, 247, 0.28), rgba(20, 184, 166, 0.12)),
+    linear-gradient(135deg, #0f172a 0%, #0f766e 55%, #14b8a6 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.32);
 }
+
+
 
 .header-bar {
   min-height: 78px;
@@ -66,12 +69,34 @@ a:hover {
   justify-content: space-between;
 }
 
+
+
 .brand-link {
   display: inline-flex;
   align-items: center;
   gap: 12px;
   color: var(--ink-900);
 }
+
+.app-header .brand-link,
+.app-header .brand-link:hover {
+  color: #fff;
+}
+
+.app-header .brand-eyebrow {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.app-header .brand-title {
+  color: #fff;
+}
+
+.app-header .brand-avatar {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+}
+
 
 .brand-avatar {
   width: 48px;
@@ -126,6 +151,8 @@ a:hover {
   padding: 16px 18px;
   box-shadow: var(--shadow-quiet);
 }
+
+
 
 .page-hero h3 {
   margin: 0;
