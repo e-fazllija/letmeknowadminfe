@@ -54,10 +54,10 @@ export default function Clients() {
           <div className="page-hero mb-3">
             <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap">
               <div>
-                <div className="eyebrow">Superuser</div>
+                <div className="eyebrow" style={{ letterSpacing: '-0.5px' }}>Intent LetMeKnow</div>
                 <h3 className="fw-bold">Clienti e abbonamenti</h3>
                 <p className="mb-0 text-secondary">
-                  Panoramica aziende con filtri rapidi e focus sulle sottoscrizioni.
+                  Panoramica aziende.
                 </p>
               </div>
               <div className="d-flex align-items-center gap-2 flex-wrap">
@@ -73,7 +73,7 @@ export default function Clients() {
                 </div>
                 <div className="metric-pill">
                   <span className="text-primary">●</span>
-                  <span>In prova</span>
+                  <span>Pendenti</span>
                   <strong>{summary.trialing}</strong>
                 </div>
               </div>
@@ -103,9 +103,7 @@ export default function Clients() {
                   >
                     <option value="ALL">Tutti</option>
                     <option value="ACTIVE">Attivo</option>
-                    <option value="TRIALING">In prova</option>
-                    <option value="PAST_DUE">In ritardo</option>
-                    <option value="CANCELED">Cancellato</option>
+                    <option value="TRIALING">Pendenti</option>
                     <option value="EXPIRED">Terminato</option>
                   </Form.Select>
                 </Form.Group>

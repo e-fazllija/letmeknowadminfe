@@ -19,7 +19,7 @@ export default function Header() {
             />
           </div>
           <div className="lh-sm">
-            <div className="brand-eyebrow">Superuser</div>
+            <div className="brand-eyebrow">Intent</div>
             <div className="brand-title">LetMeKnow</div>
           </div>
         </Link>

@@ -38,7 +38,6 @@ export default function Login() {
                 <Col lg={5} className="d-none d-lg-flex flex-column justify-content-between auth-hero-pane">
                   <div>
                     <img src={logoDark} alt="LetMeKnow" className="auth-logo mb-4" />
-                    <div className="label-muted mb-2">Accesso riservato</div>
                     <p className="mb-3">
                       Gestisci clienti e abbonamenti in un&apos;unica console sicura.
                     </p>

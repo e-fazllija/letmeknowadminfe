@@ -132,14 +132,11 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
           <th>ID</th>
           <th>Importo</th>
           <th>Valuta</th>
-          <th>Frequenza</th>
           <th>Termini</th>
           <th>Metodo</th>
           <th>Stato</th>
           <th>Inizio</th>
-          <th>Prossima fatturazione</th>
-          <th>Fine prova</th>
-          <th>Annullato il</th>
+          <th>Fine</th>
           <th>Creato il</th>
         </tr>
       </thead>
@@ -149,14 +146,11 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
             <td>{s.id}</td>
             <td>{(s.amount / 100).toFixed(2)}</td>
             <td>{s.currency}</td>
-            <td>{s.billingCycle}</td>
             <td>{s.contractTerm}</td>
             <td>{s.method}</td>
             <td><StatusBadge status={s.status} /></td>
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
             <td>{s.nextBillingAt ? new Date(s.nextBillingAt).toLocaleDateString() : '-'}</td>
-            <td>{s.trialEndsAt ? new Date(s.trialEndsAt).toLocaleDateString() : '-'}</td>
-            <td>{s.canceledAt ? new Date(s.canceledAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.createdAt).toLocaleDateString()}</td>
           </tr>
         ))}
