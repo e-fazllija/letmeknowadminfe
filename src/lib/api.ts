@@ -17,9 +17,13 @@ export interface Subscription {
   currency: string
   billingCycle: string
   contractTerm: string
-  method: string
-  status: 'ACTIVE' | 'TRIALING' | 'PAST_DUE' | 'CANCELED' | 'EXPIRED'
+  method?: string
+  paymentMethod?: string
+  payment?: { method?: string; paymentMethod?: string }
+  payments?: { method?: string; paymentMethod?: string }[]
+  status: 'ACTIVE' | 'TRIALING' | 'PENDING_PAYMENT' | 'PAST_DUE' | 'CANCELED' | 'EXPIRED'
   startsAt: string
+  endsAt?: string
   nextBillingAt?: string
   trialEndsAt?: string
   canceledAt?: string
@@ -33,9 +37,15 @@ export interface Client {
   status: string
   employeeRange: string
   createdAt: string
+  invoiceStatus?: 'DA_FATTURARE' | 'FATTURATO'
   billingTaxId?: string
   billingEmail?: string
+  billingPec?: string
+  billingSdiCode?: string
+  billingAddressLine1?: string
+  billingZip?: string
   billingCity?: string
+  billingProvince?: string
   billingCountry?: string
   subscriptions: Subscription[]
 }

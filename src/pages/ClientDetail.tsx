@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
 import { getClient } from '../lib/api'
+import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
 
 export default function ClientDetail() {
@@ -69,14 +70,17 @@ export default function ClientDetail() {
                         <Col sm={12}>
                           <strong>Email contatto:</strong> {client.contactEmail}
                         </Col>
-                        <Col sm={6}>
+                        <Col sm={12}>
                           <strong>Stato cliente:</strong> {client.status}
                         </Col>
-                        <Col sm={6}>
-                          <strong>Dipendenti:</strong> {client.employeeRange}
+                        <Col sm={12}>
+                          <strong>Dipendenti:</strong> {formatEmployeeRange(client.employeeRange)}
                         </Col>
-                        <Col sm={6}>
+                        <Col sm={12}>
                           <strong>Creato il:</strong> {new Date(client.createdAt).toLocaleDateString()}
+                        </Col>
+                        <Col sm={12}>
+                          <strong>ID cliente:</strong> {client.id}
                         </Col>
                       </Row>
                     </Card.Body>
@@ -86,15 +90,33 @@ export default function ClientDetail() {
                   <Card className="info-card h-100">
                     <Card.Body>
                       <Card.Title className="h6 mb-3">Fatturazione</Card.Title>
-                      <Row className="gy-2">
-                        <Col sm={6}>
+                      <Row className="gy-2 gx-3">
+                        <Col sm={12}>
                           <strong>P. IVA:</strong> {client.billingTaxId || '-'}
                         </Col>
-                        <Col sm={6}>
+                        <Col sm={12}>
                           <strong>Email fatturazione:</strong> {client.billingEmail || '-'}
                         </Col>
                         <Col sm={12}>
-                          <strong>Localita:</strong> {client.billingCity || '-'} {client.billingCountry || ''}
+                          <strong>Indirizzo:</strong> {client.billingAddressLine1 || '-'}
+                        </Col>
+                        <Col sm={12}>
+                          <strong>Paese:</strong> {client.billingCountry || '-'}
+                        </Col>
+                        <Col sm={6}>
+                          <strong>PEC:</strong> {client.billingPec || '-'}
+                        </Col>
+                        <Col sm={6}>
+                          <strong>Codice SDI:</strong> {client.billingSdiCode || '-'}
+                        </Col>
+                        <Col sm={4}>
+                          <strong>CAP:</strong> {client.billingZip || '-'}
+                        </Col>
+                        <Col sm={4}>
+                          <strong>Citta:</strong> {client.billingCity || '-'}
+                        </Col>
+                        <Col sm={4}>
+                          <strong>Provincia:</strong> {client.billingProvince || '-'}
                         </Col>
                       </Row>
                     </Card.Body>
@@ -132,11 +154,11 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
           <th>ID</th>
           <th>Importo</th>
           <th>Valuta</th>
-          <th>Termini</th>
+          <th>Contratto</th>
           <th>Metodo</th>
           <th>Stato</th>
-          <th>Inizio</th>
-          <th>Fine</th>
+          <th>Inizio Contratto</th>
+          <th>Fine contratto</th>
           <th>Creato il</th>
         </tr>
       </thead>
@@ -144,13 +166,13 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
         {subs.map((s) => (
           <tr key={s.id}>
             <td>{s.id}</td>
-            <td>{(s.amount / 100).toFixed(2)}</td>
+            <td>{formatAmount(s.amount)}</td>
             <td>{s.currency}</td>
-            <td>{s.contractTerm}</td>
-            <td>{s.method}</td>
+            <td>{formatContractTerm(s.contractTerm)}</td>
+            <td>{formatPaymentMethod(resolveSubscriptionMethod(s))}</td>
             <td><StatusBadge status={s.status} /></td>
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
-            <td>{s.nextBillingAt ? new Date(s.nextBillingAt).toLocaleDateString() : '-'}</td>
+            <td>{s.endsAt ? new Date(s.endsAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.createdAt).toLocaleDateString()}</td>
           </tr>
         ))}

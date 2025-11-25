@@ -1,13 +1,15 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+﻿import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Row, Spinner, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
 import { getClients } from '../lib/api'
+import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
 import logo from '@/assets/logo-superuser.svg'
 
 type StatusFilter = 'ALL' | Subscription['status']
+type InvoiceStatus = 'DA_FATTURARE' | 'FATTURATO'
 
 export default function Clients() {
   const [loading, setLoading] = useState(true)
@@ -16,6 +18,7 @@ export default function Clients() {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>('ALL')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+  const [invoiceStatus, setInvoiceStatus] = useState<Record<string, InvoiceStatus>>({})
 
   useEffect(() => {
     getClients()
@@ -23,6 +26,23 @@ export default function Clients() {
       .catch((e) => setError(e?.message || 'Errore caricamento'))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!clients.length) return
+    setInvoiceStatus((prev) => {
+      let changed = false
+      const next = { ...prev }
+      clients.forEach((c) => {
+        if (!next[c.id]) {
+          next[c.id] = (c.invoiceStatus as InvoiceStatus) || 'DA_FATTURARE'
+          changed = true
+        }
+      })
+      return changed ? next : prev
+    })
+  }, [clients])
+
+  const getInvoiceStatus = (id: string): InvoiceStatus => invoiceStatus[id] || 'DA_FATTURARE'
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -40,9 +60,10 @@ export default function Clients() {
   const summary = useMemo(() => {
     const total = clients.length
     const active = clients.filter((c) => c.subscriptions.some((s) => s.status === 'ACTIVE')).length
-    const trialing = clients.filter((c) => c.subscriptions.some((s) => s.status === 'TRIALING')).length
-    return { total, active, trialing }
-  }, [clients])
+    const pending = clients.filter((c) => c.subscriptions.some((s) => s.status === 'PENDING_PAYMENT')).length
+    const toBill = clients.filter((c) => getInvoiceStatus(c.id) === 'DA_FATTURARE').length
+    return { total, active, pending, toBill }
+  }, [clients, invoiceStatus])
 
   const toggle = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }))
 
@@ -51,7 +72,7 @@ export default function Clients() {
       <Header />
       <div className="page-shell">
         <div className="container">
-          <div className="page-hero mb-3">
+                    <div className="page-hero mb-3">
             <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap">
               <div>
                 <div className="eyebrow" style={{ letterSpacing: '-0.5px' }}>Intent LetMeKnow</div>
@@ -63,18 +84,23 @@ export default function Clients() {
               <div className="d-flex align-items-center gap-2 flex-wrap">
                 <div className="metric-pill">
                   <img src={logo} alt="Clienti" width={18} height={18} />
-                  <span>Clienti</span>
+                  <span>Clienti:</span>
                   <strong>{summary.total}</strong>
                 </div>
                 <div className="metric-pill">
                   <span className="text-success">●</span>
-                  <span>Attivi</span>
+                  <span>Attivi:</span>
                   <strong>{summary.active}</strong>
                 </div>
                 <div className="metric-pill">
-                  <span className="text-primary">●</span>
-                  <span>Pendenti</span>
-                  <strong>{summary.trialing}</strong>
+                  <span className="text-warning">●</span>
+                  <span>Pendenti:</span>
+                  <strong>{summary.pending}</strong>
+                </div>
+                <div className="metric-pill">
+                  <span className="text-secondary">●</span>
+                  <span>Da fatturare:</span>
+                  <strong>{summary.toBill}</strong>
                 </div>
               </div>
             </div>
@@ -103,7 +129,8 @@ export default function Clients() {
                   >
                     <option value="ALL">Tutti</option>
                     <option value="ACTIVE">Attivo</option>
-                    <option value="TRIALING">Pendenti</option>
+                    <option value="PENDING_PAYMENT">Pendente pagamento</option>
+                    <option value="TRIALING">Trial</option>
                     <option value="EXPIRED">Terminato</option>
                   </Form.Select>
                 </Form.Group>
@@ -139,6 +166,7 @@ export default function Clients() {
                       <th>Email</th>
                       <th>Stato</th>
                       <th>Dipendenti</th>
+                      <th>Fatturazione</th>
                       <th>Creato il</th>
                       <th className="text-end">Azioni</th>
                     </tr>
@@ -168,7 +196,17 @@ export default function Clients() {
                               </span>
                             ))}
                           </td>
-                          <td>{c.employeeRange}</td>
+                          <td>{formatEmployeeRange(c.employeeRange)}</td>
+                          <td>
+                            <Form.Select
+                              size="sm"
+                              value={getInvoiceStatus(c.id)}
+                              onChange={(e) => setInvoiceStatus((prev) => ({ ...prev, [c.id]: e.target.value as InvoiceStatus }))}
+                            >
+                              <option value="DA_FATTURARE">Da fatturare</option>
+                              <option value="FATTURATO">Fatturato</option>
+                            </Form.Select>
+                          </td>
                           <td>{new Date(c.createdAt).toLocaleDateString()}</td>
                           <td className="text-end">
                             <Link to={`/clients/${c.id}`} className="btn btn-sm btn-dark rounded-pill px-3">
@@ -178,7 +216,7 @@ export default function Clients() {
                         </tr>
                         {expanded[c.id] && (
                           <tr>
-                            <td colSpan={6} className="bg-body-tertiary">
+                            <td colSpan={7} className="bg-body-tertiary">
                               <SubscriptionsTable subs={c.subscriptions} />
                             </td>
                           </tr>
@@ -208,26 +246,30 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
         <tr>
           <th>Importo</th>
           <th>Valuta</th>
-          <th>Frequenza</th>
+          <th>Contratto</th>
           <th>Metodo</th>
           <th>Stato</th>
-          <th>Inizio</th>
-          <th>Prossima fatturazione</th>
+          <th>Inizio Contratto</th>
+          <th>Fine contratto</th>
         </tr>
       </thead>
       <tbody>
         {subs.map((s) => (
           <tr key={s.id}>
-            <td>{(s.amount / 100).toFixed(2)}</td>
+            <td>{formatAmount(s.amount)}</td>
             <td>{s.currency}</td>
-            <td>{s.billingCycle} / {s.contractTerm}</td>
-            <td>{s.method}</td>
+            <td>{formatContractTerm(s.contractTerm)}</td>
+            <td>{formatPaymentMethod(resolveSubscriptionMethod(s))}</td>
             <td><StatusBadge status={s.status} /></td>
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
-            <td>{s.nextBillingAt ? new Date(s.nextBillingAt).toLocaleDateString() : '-'}</td>
+            <td>{s.endsAt ? new Date(s.endsAt).toLocaleDateString() : '-'}</td>
           </tr>
         ))}
       </tbody>
     </Table>
   )
 }
+
+
+
+
