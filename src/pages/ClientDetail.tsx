@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap'
+import { Alert, Button, Card, Col, Dropdown, Row, Spinner, Table } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
-import { getClient } from '../lib/api'
-import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, resolveSubscriptionMethod } from '../lib/formatters'
-import type { Client, Subscription } from '../lib/api'
+import { getClient, getClientInvoices } from '../lib/api'
+import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, formatPaymentStatus, resolveSubscriptionMethod } from '../lib/formatters'
+import type { Client, Invoice, Subscription } from '../lib/api'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -13,13 +13,27 @@ export default function ClientDetail() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [loadingInvoices, setLoadingInvoices] = useState(true)
+  const [invoiceError, setInvoiceError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
+    setError(null)
     getClient(id)
       .then(setClient)
       .catch((e) => setError(e?.message || 'Errore caricamento'))
       .finally(() => setLoading(false))
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    setInvoiceError(null)
+    setLoadingInvoices(true)
+    getClientInvoices(id)
+      .then(setInvoices)
+      .catch((e) => setInvoiceError(e?.message || 'Errore fatture'))
+      .finally(() => setLoadingInvoices(false))
   }, [id])
 
   const mainStatus = client?.subscriptions?.[0]?.status
@@ -58,6 +72,71 @@ export default function ClientDetail() {
                       </span>
                     </div>
                   </div>
+                  <Dropdown align="end">
+                    <Dropdown.Toggle variant="light" className="rounded-pill shadow-sm d-flex align-items-center gap-2">
+                      <span>Documenti Stripe</span>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className="p-0" style={{ minWidth: 320 }}>
+                      <div className="px-3 py-2 border-bottom">
+                        <div className="fw-semibold">Fatture e ricevute</div>
+                        <div className="text-secondary small">
+                          Collegate al tenant via Stripe
+                        </div>
+                      </div>
+                      {loadingInvoices && (
+                        <div className="px-3 py-2 d-flex align-items-center gap-2">
+                          <Spinner animation="border" size="sm" />
+                          <span className="small">Caricamento documenti...</span>
+                        </div>
+                      )}
+                      {invoiceError && (
+                        <div className="px-3 py-2 text-danger small">
+                          {invoiceError}
+                        </div>
+                      )}
+                      {!loadingInvoices && !invoiceError && invoices.length === 0 && (
+                        <div className="px-3 py-2 text-secondary small">
+                          Nessuna fattura o ricevuta disponibile.
+                        </div>
+                      )}
+                      {!loadingInvoices && !invoiceError && invoices.length > 0 && (
+                        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+                          {invoices.map((inv) => (
+                            <div key={inv.id} className="px-3 py-2 border-bottom">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <div className="fw-semibold small">
+                                  {inv.invoiceNumber || inv.stripeInvoiceId || inv.id}
+                                </div>
+                                <div className="text-secondary small">
+                                  {new Date(inv.paymentDate || inv.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <div className="d-flex flex-wrap align-items-center gap-2 mt-1 small">
+                                <span className="badge bg-light text-dark border">
+                                  {formatAmount(inv.amount as number)} {inv.currency}
+                                </span>
+                                {inv.invoicePdf && (
+                                  <a href={inv.invoicePdf} target="_blank" rel="noreferrer" className="link-primary">
+                                    PDF fattura
+                                  </a>
+                                )}
+                                {inv.invoiceUrl && (
+                                  <a href={inv.invoiceUrl} target="_blank" rel="noreferrer" className="link-primary">
+                                    Pagina fattura
+                                  </a>
+                                )}
+                                {inv.receiptUrl && (
+                                  <a href={inv.receiptUrl} target="_blank" rel="noreferrer" className="link-primary">
+                                    Ricevuta
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </div>
               </div>
 
@@ -137,6 +216,36 @@ export default function ClientDetail() {
                   </div>
                 </Card.Body>
               </Card>
+
+              <Card className="table-card mt-3 border-0">
+                <Card.Body className="p-0">
+                  <div className="d-flex align-items-center justify-content-between px-3 pt-3">
+                    <div>
+                      <div className="eyebrow mb-1">Fatture e ricevute</div>
+                      <h6 className="mb-0">Documenti Stripe per questo tenant</h6>
+                    </div>
+                    {loadingInvoices && (
+                      <div className="d-flex align-items-center gap-2 px-1">
+                        <Spinner animation="border" size="sm" />
+                        <span className="small">Aggiornamento...</span>
+                      </div>
+                    )}
+                  </div>
+                  {invoiceError && (
+                    <div className="px-3 py-2 text-danger small">{invoiceError}</div>
+                  )}
+                  {!invoiceError && invoices.length === 0 && !loadingInvoices && (
+                    <div className="px-3 py-2 text-secondary small">
+                      Nessun documento trovato per questo tenant.
+                    </div>
+                  )}
+                  {invoices.length > 0 && (
+                    <div className="table-responsive p-3">
+                      <InvoicesTable invoices={invoices} />
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
             </>
           )}
         </div>
@@ -174,6 +283,56 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
             <td>{s.endsAt ? new Date(s.endsAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+
+function InvoicesTable({ invoices }: { invoices: Invoice[] }) {
+  return (
+    <Table bordered responsive striped className="align-middle mb-0">
+      <thead className="table-light">
+        <tr>
+          <th>Numero</th>
+          <th>Importo</th>
+          <th>Stato</th>
+          <th>Data pagamento</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        {invoices.map((inv) => (
+          <tr key={inv.id}>
+            <td>{inv.invoiceNumber || inv.stripeInvoiceId || inv.id}</td>
+            <td>{formatAmount(inv.amount as number)} {inv.currency}</td>
+            <td>
+              <span className="badge bg-light text-dark border">
+                {formatPaymentStatus(inv.status)}
+              </span>
+            </td>
+            <td>{new Date(inv.paymentDate || inv.createdAt).toLocaleDateString()}</td>
+            <td className="d-flex flex-wrap gap-2">
+              {inv.invoicePdf && (
+                <a href={inv.invoicePdf} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-dark rounded-pill">
+                  PDF
+                </a>
+              )}
+              {inv.invoiceUrl && (
+                <a href={inv.invoiceUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-dark rounded-pill">
+                  Fattura
+                </a>
+              )}
+              {inv.receiptUrl && (
+                <a href={inv.receiptUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-dark rounded-pill">
+                  Ricevuta
+                </a>
+              )}
+              {!inv.invoicePdf && !inv.invoiceUrl && !inv.receiptUrl && (
+                <span className="text-secondary small">Nessun link</span>
+              )}
+            </td>
           </tr>
         ))}
       </tbody>

@@ -10,6 +10,26 @@ import logo from '@/assets/logo-superuser.svg'
 
 type StatusFilter = 'ALL' | Subscription['status']
 type InvoiceStatus = 'DA_FATTURARE' | 'FATTURATO'
+const INVOICE_STATUS_KEY = 'lmw_invoice_status'
+
+function loadInvoiceStatus(): Record<string, InvoiceStatus> {
+  try {
+    const raw = localStorage.getItem(INVOICE_STATUS_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function persistInvoiceStatus(state: Record<string, InvoiceStatus>) {
+  try {
+    localStorage.setItem(INVOICE_STATUS_KEY, JSON.stringify(state))
+  } catch {
+    // ignore write errors (private mode, quota, etc.)
+  }
+}
 
 export default function Clients() {
   const [loading, setLoading] = useState(true)
@@ -18,7 +38,7 @@ export default function Clients() {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<StatusFilter>('ALL')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [invoiceStatus, setInvoiceStatus] = useState<Record<string, InvoiceStatus>>({})
+  const [invoiceStatus, setInvoiceStatus] = useState<Record<string, InvoiceStatus>>(loadInvoiceStatus)
 
   useEffect(() => {
     getClients()
@@ -38,11 +58,19 @@ export default function Clients() {
           changed = true
         }
       })
+      if (changed) persistInvoiceStatus(next)
       return changed ? next : prev
     })
   }, [clients])
 
   const getInvoiceStatus = (id: string): InvoiceStatus => invoiceStatus[id] || 'DA_FATTURARE'
+  const updateInvoiceStatus = (id: string, value: InvoiceStatus) => {
+    setInvoiceStatus((prev) => {
+      const next = { ...prev, [id]: value }
+      persistInvoiceStatus(next)
+      return next
+    })
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -201,7 +229,12 @@ export default function Clients() {
                             <Form.Select
                               size="sm"
                               value={getInvoiceStatus(c.id)}
-                              onChange={(e) => setInvoiceStatus((prev) => ({ ...prev, [c.id]: e.target.value as InvoiceStatus }))}
+                              onChange={(e) =>
+                                updateInvoiceStatus(
+                                  c.id,
+                                  e.target.value as InvoiceStatus,
+                                )
+                              }
                             >
                               <option value="DA_FATTURARE">Da fatturare</option>
                               <option value="FATTURATO">Fatturato</option>

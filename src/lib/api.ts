@@ -50,6 +50,25 @@ export interface Client {
   subscriptions: Subscription[]
 }
 
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+
+export interface Invoice {
+  id: string
+  amount: number | string
+  currency: string
+  status: PaymentStatus
+  paymentDate?: string | null
+  dueDate?: string | null
+  createdAt: string
+  stripeInvoiceId?: string | null
+  stripePaymentIntentId?: string | null
+  stripeChargeId?: string | null
+  invoicePdf?: string | null
+  invoiceUrl?: string | null
+  invoiceNumber?: string | null
+  receiptUrl?: string | null
+}
+
 export const api = axios.create({
   baseURL: '/v1',
 })
@@ -104,5 +123,23 @@ export async function getClient(id: string): Promise<Client> {
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY)
+}
+
+export async function getClientInvoices(clientId: string): Promise<Invoice[]> {
+  try {
+    const { data } = await api.get<Invoice[]>(
+      `/platform/clients/${clientId}/invoices`,
+    )
+    return data.map((inv) => ({
+      ...inv,
+      amount:
+        typeof inv.amount === 'string'
+          ? parseFloat(inv.amount)
+          : (inv.amount as number),
+    }))
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || err?.message || 'Errore fatture'
+    throw new Error(msg)
+  }
 }
 

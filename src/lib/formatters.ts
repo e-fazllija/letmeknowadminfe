@@ -60,3 +60,14 @@ export function formatEmployeeRange(range?: string) {
   if (match) return `${match[1]}/${match[2]}`
   return range.replace(/_/g, ' ')
 }
+
+export function formatPaymentStatus(status?: string) {
+  if (!status) return '-'
+  const normalized = status.trim().toUpperCase()
+  if (normalized === 'COMPLETED') return 'Pagato'
+  if (normalized === 'FAILED') return 'Fallito'
+  if (normalized === 'REFUNDED') return 'Rimborsato'
+  if (normalized === 'PENDING') return 'In sospeso'
+  const readable = normalized.replace(/_/g, ' ').toLowerCase()
+  return readable ? readable.charAt(0).toUpperCase() + readable.slice(1) : status
+}
