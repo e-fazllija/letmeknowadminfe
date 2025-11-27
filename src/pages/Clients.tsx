@@ -7,6 +7,7 @@ import { getClients } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
 import logo from '@/assets/logo-superuser.svg'
+import { useNotifications } from '@/context/NotificationContext'
 
 type StatusFilter = 'ALL' | Subscription['status']
 type InvoiceStatus = 'DA_FATTURARE' | 'FATTURATO'
@@ -39,6 +40,7 @@ export default function Clients() {
   const [status, setStatus] = useState<StatusFilter>('ALL')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [invoiceStatus, setInvoiceStatus] = useState<Record<string, InvoiceStatus>>(loadInvoiceStatus)
+  const { notifications } = useNotifications()
 
   useEffect(() => {
     getClients()
@@ -92,6 +94,8 @@ export default function Clients() {
     const toBill = clients.filter((c) => getInvoiceStatus(c.id) === 'DA_FATTURARE').length
     return { total, active, pending, toBill }
   }, [clients, invoiceStatus])
+
+  const notificationClientIds = useMemo(() => new Set(notifications.map((n) => n.clientId)), [notifications])
 
   const toggle = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }))
 
@@ -204,6 +208,7 @@ export default function Clients() {
                       <Fragment key={c.id}>
                         <tr>
                           <td>
+                            {notificationClientIds.has(c.id) && <span className="row-notif-dot" aria-hidden="true" />}
                             <Button
                               size="sm"
                               variant="outline-dark"

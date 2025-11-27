@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import NotificationBell from './NotificationBell'
 import logo from '@/assets/logo-superuser.svg'
 
 export default function Header() {
@@ -33,6 +34,7 @@ export default function Header() {
               <small className="text-muted text-uppercase">{user?.role || 'Role'}</small>
             </div>
           </div>
+          <NotificationBell />
           <button className="btn btn-sm btn-dark rounded-pill px-3" onClick={logout}>
             Logout
           </button>

@@ -6,16 +6,22 @@ import StatusBadge from '../components/StatusBadge'
 import { getClient, getClientInvoices } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, formatPaymentStatus, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Invoice, Subscription } from '../lib/api'
+import { useNotifications } from '@/context/NotificationContext'
 
 export default function ClientDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { notifications, markNotificationsRead } = useNotifications()
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loadingInvoices, setLoadingInvoices] = useState(true)
   const [invoiceError, setInvoiceError] = useState<string | null>(null)
+  const [showNewInvoiceBanner, setShowNewInvoiceBanner] = useState(false)
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false)
+  const [pendingPaymentNotifIds, setPendingPaymentNotifIds] = useState<string[]>([])
+  const [pendingUpdateNotifIds, setPendingUpdateNotifIds] = useState<string[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -35,6 +41,27 @@ export default function ClientDetail() {
       .catch((e) => setInvoiceError(e?.message || 'Errore fatture'))
       .finally(() => setLoadingInvoices(false))
   }, [id])
+
+  useEffect(() => {
+    setShowNewInvoiceBanner(false)
+    setShowUpdateBanner(false)
+    setPendingPaymentNotifIds([])
+    setPendingUpdateNotifIds([])
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    const paymentNotifs = notifications.filter(
+      (n) => n.clientId === id && n.kind === 'PAYMENT',
+    )
+    setPendingPaymentNotifIds(paymentNotifs.map((n) => n.id))
+    setShowNewInvoiceBanner(paymentNotifs.length > 0)
+    const updateNotifs = notifications.filter(
+      (n) => n.clientId === id && n.kind === 'CLIENT_UPDATE',
+    )
+    setPendingUpdateNotifIds(updateNotifs.map((n) => n.id))
+    setShowUpdateBanner(updateNotifs.length > 0)
+  }, [notifications, id])
 
   const mainStatus = client?.subscriptions?.[0]?.status
 
@@ -72,71 +99,109 @@ export default function ClientDetail() {
                       </span>
                     </div>
                   </div>
-                  <Dropdown align="end">
-                    <Dropdown.Toggle variant="light" className="rounded-pill shadow-sm d-flex align-items-center gap-2">
-                      <span>Documenti Stripe</span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu className="p-0" style={{ minWidth: 320 }}>
-                      <div className="px-3 py-2 border-bottom">
-                        <div className="fw-semibold">Fatture e ricevute</div>
-                        <div className="text-secondary small">
-                          Collegate al tenant via Stripe
+                  <div className="d-flex flex-column align-items-end gap-2 flex-grow-0">
+                    <Dropdown align="end">
+                      <Dropdown.Toggle variant="light" className="rounded-pill shadow-sm d-flex align-items-center gap-2">
+                        <span>Documenti Stripe</span>
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu className="p-0" style={{ minWidth: 320 }}>
+                        <div className="px-3 py-2 border-bottom">
+                          <div className="fw-semibold">Fatture e ricevute</div>
+                          <div className="text-secondary small">
+                            Collegate al tenant via Stripe
+                          </div>
                         </div>
+                        {loadingInvoices && (
+                          <div className="px-3 py-2 d-flex align-items-center gap-2">
+                            <Spinner animation="border" size="sm" />
+                            <span className="small">Caricamento documenti...</span>
+                          </div>
+                        )}
+                        {invoiceError && (
+                          <div className="px-3 py-2 text-danger small">
+                            {invoiceError}
+                          </div>
+                        )}
+                        {!loadingInvoices && !invoiceError && invoices.length === 0 && (
+                          <div className="px-3 py-2 text-secondary small">
+                            Nessuna fattura o ricevuta disponibile.
+                          </div>
+                        )}
+                        {!loadingInvoices && !invoiceError && invoices.length > 0 && (
+                          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+                            {invoices.map((inv) => (
+                              <div key={inv.id} className="px-3 py-2 border-bottom">
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div className="fw-semibold small">
+                                    {inv.invoiceNumber || inv.stripeInvoiceId || inv.id}
+                                  </div>
+                                  <div className="text-secondary small">
+                                    {new Date(inv.paymentDate || inv.createdAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                                <div className="d-flex flex-wrap align-items-center gap-2 mt-1 small">
+                                  <span className="badge bg-light text-dark border">
+                                    {formatAmount(inv.amount as number)} {inv.currency}
+                                  </span>
+                                  {inv.invoicePdf && (
+                                    <a href={inv.invoicePdf} target="_blank" rel="noreferrer" className="link-primary">
+                                      PDF fattura
+                                    </a>
+                                  )}
+                                  {inv.invoiceUrl && (
+                                    <a href={inv.invoiceUrl} target="_blank" rel="noreferrer" className="link-primary">
+                                      Pagina fattura
+                                    </a>
+                                  )}
+                                  {inv.receiptUrl && (
+                                    <a href={inv.receiptUrl} target="_blank" rel="noreferrer" className="link-primary">
+                                      Ricevuta
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                    {(showNewInvoiceBanner || showUpdateBanner) && (
+                      <div className="hero-alert-stack">
+                        {showNewInvoiceBanner && (
+                          <div className="alert alert-warning mb-0 d-flex align-items-center gap-2 flex-wrap hero-alert">
+                            <span className="fw-semibold">Nuova fattura registrata per questo cliente.</span>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-warning rounded-pill"
+                              onClick={() => {
+                                if (pendingPaymentNotifIds.length) markNotificationsRead(pendingPaymentNotifIds)
+                                setShowNewInvoiceBanner(false)
+                                setPendingPaymentNotifIds([])
+                              }}
+                            >
+                              Ok, visto
+                            </button>
+                          </div>
+                        )}
+                        {showUpdateBanner && (
+                          <div className="alert alert-warning mb-0 d-flex align-items-center gap-2 flex-wrap hero-alert">
+                            <span className="fw-semibold">Dati contatto/fatturazione aggiornati per questo cliente.</span>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-warning rounded-pill"
+                              onClick={() => {
+                                if (pendingUpdateNotifIds.length) markNotificationsRead(pendingUpdateNotifIds)
+                                setShowUpdateBanner(false)
+                                setPendingUpdateNotifIds([])
+                              }}
+                            >
+                              Ok, visto
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      {loadingInvoices && (
-                        <div className="px-3 py-2 d-flex align-items-center gap-2">
-                          <Spinner animation="border" size="sm" />
-                          <span className="small">Caricamento documenti...</span>
-                        </div>
-                      )}
-                      {invoiceError && (
-                        <div className="px-3 py-2 text-danger small">
-                          {invoiceError}
-                        </div>
-                      )}
-                      {!loadingInvoices && !invoiceError && invoices.length === 0 && (
-                        <div className="px-3 py-2 text-secondary small">
-                          Nessuna fattura o ricevuta disponibile.
-                        </div>
-                      )}
-                      {!loadingInvoices && !invoiceError && invoices.length > 0 && (
-                        <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-                          {invoices.map((inv) => (
-                            <div key={inv.id} className="px-3 py-2 border-bottom">
-                              <div className="d-flex justify-content-between align-items-center">
-                                <div className="fw-semibold small">
-                                  {inv.invoiceNumber || inv.stripeInvoiceId || inv.id}
-                                </div>
-                                <div className="text-secondary small">
-                                  {new Date(inv.paymentDate || inv.createdAt).toLocaleDateString()}
-                                </div>
-                              </div>
-                              <div className="d-flex flex-wrap align-items-center gap-2 mt-1 small">
-                                <span className="badge bg-light text-dark border">
-                                  {formatAmount(inv.amount as number)} {inv.currency}
-                                </span>
-                                {inv.invoicePdf && (
-                                  <a href={inv.invoicePdf} target="_blank" rel="noreferrer" className="link-primary">
-                                    PDF fattura
-                                  </a>
-                                )}
-                                {inv.invoiceUrl && (
-                                  <a href={inv.invoiceUrl} target="_blank" rel="noreferrer" className="link-primary">
-                                    Pagina fattura
-                                  </a>
-                                )}
-                                {inv.receiptUrl && (
-                                  <a href={inv.receiptUrl} target="_blank" rel="noreferrer" className="link-primary">
-                                    Ricevuta
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </Dropdown.Menu>
-                  </Dropdown>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -97,6 +97,105 @@ a:hover {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
 }
 
+.header-icon-btn {
+  padding: 6px 12px;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.header-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #fff;
+  transform: translateY(-1px);
+}
+
+.header-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.header-icon-btn.dropdown-toggle::after {
+  display: none;
+}
+
+.notif-menu {
+  min-width: 320px;
+  border: 1px solid var(--ink-300);
+  box-shadow: var(--shadow-soft);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.notif-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ink-300);
+  transition: background-color 0.15s ease;
+}
+
+.notif-item:last-child {
+  border-bottom: 0;
+}
+
+.notif-item:hover {
+  background: var(--surface-muted);
+}
+
+.notif-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-500);
+  font-size: 0.85rem;
+}
+
+.notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent-amber);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+}
+
+.row-notif-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent-amber);
+  box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.2);
+  margin-right: 8px;
+}
+
+.hero-alert-stack {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.hero-alert {
+  align-self: flex-end;
+  border-radius: 14px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
 
 .brand-avatar {
   width: 48px;
@@ -300,6 +399,7 @@ a:hover {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  align-self: center;
 }
 
 .auth-bullet {

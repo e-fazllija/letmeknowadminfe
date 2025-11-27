@@ -69,6 +69,21 @@ export interface Invoice {
   receiptUrl?: string | null
 }
 
+export type NotificationKind = 'PAYMENT' | 'CLIENT_UPDATE'
+
+export interface NotificationItem {
+  id: string
+  kind: NotificationKind
+  clientId: string
+  clientName: string
+  createdAt: string
+  amount?: number
+  currency?: string
+  invoiceId?: string | null
+  invoiceNumber?: string | null
+  message?: string
+}
+
 export const api = axios.create({
   baseURL: '/v1',
 })
@@ -139,6 +154,23 @@ export async function getClientInvoices(clientId: string): Promise<Invoice[]> {
     }))
   } catch (err: any) {
     const msg = err?.response?.data?.message || err?.message || 'Errore fatture'
+    throw new Error(msg)
+  }
+}
+
+export async function getPaymentNotifications(limit = 10): Promise<NotificationItem[]> {
+  try {
+    const { data } = await api.get<NotificationItem[]>(
+      '/platform/payments/notifications',
+      { params: { limit } },
+    )
+    return data.map((n) => ({
+      ...n,
+      amount: typeof n.amount === 'string' ? parseFloat(n.amount) : n.amount,
+      kind: n.kind || 'PAYMENT',
+    }))
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || err?.message || 'Errore notifiche'
     throw new Error(msg)
   }
 }
