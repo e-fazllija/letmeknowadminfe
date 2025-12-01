@@ -77,7 +77,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [lastSeenAt, setLastSeenAt] = useState<number>(readLastSeen)
+  const [, setLastSeenAt] = useState<number>(readLastSeen)
   const [useInvoiceFallback, setUseInvoiceFallback] = useState(false)
   const [seenNotificationIds, setSeenNotificationIds] = useState<Set<string>>(seenRef.current)
   const [clientSnapshot, setClientSnapshot] = useState<Record<string, string>>(readClientSnapshot)
