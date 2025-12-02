@@ -3,7 +3,7 @@ import { Alert, Button, Card, Col, Dropdown, Row, Spinner, Table } from 'react-b
 import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
-import { getClient, getClientInvoices } from '../lib/api'
+import { getClient, getClientInvoices, getClientSubscriptions } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, formatPaymentStatus, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Invoice, Subscription } from '../lib/api'
 import { useNotifications } from '@/context/NotificationContext'
@@ -15,6 +15,9 @@ export default function ClientDetail() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState(true)
+  const [subscriptionsError, setSubscriptionsError] = useState<string | null>(null)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loadingInvoices, setLoadingInvoices] = useState(true)
   const [invoiceError, setInvoiceError] = useState<string | null>(null)
@@ -43,6 +46,17 @@ export default function ClientDetail() {
   }, [id])
 
   useEffect(() => {
+    if (!id) return
+    setSubscriptions([])
+    setSubscriptionsError(null)
+    setLoadingSubscriptions(true)
+    getClientSubscriptions(id)
+      .then((subs) => setSubscriptions(subs))
+      .catch((e) => setSubscriptionsError(e?.message || 'Errore sottoscrizioni'))
+      .finally(() => setLoadingSubscriptions(false))
+  }, [id])
+
+  useEffect(() => {
     setShowNewInvoiceBanner(false)
     setShowUpdateBanner(false)
     setPendingPaymentNotifIds([])
@@ -63,7 +77,7 @@ export default function ClientDetail() {
     setShowUpdateBanner(updateNotifs.length > 0)
   }, [notifications, id])
 
-  const mainStatus = client?.subscriptions?.[0]?.status
+  const mainStatus = subscriptions?.[0]?.status || client?.subscriptions?.[0]?.status
 
   return (
     <>
@@ -277,7 +291,17 @@ export default function ClientDetail() {
                     </div>
                   </div>
                   <div className="table-responsive p-3">
-                    <SubscriptionsTable subs={client.subscriptions} />
+                    {subscriptionsError && (
+                      <div className="px-1 py-2 text-danger small">{subscriptionsError}</div>
+                    )}
+                    {loadingSubscriptions ? (
+                      <div className="d-flex align-items-center gap-2 px-1 py-2">
+                        <Spinner animation="border" size="sm" />
+                        <span className="small">Caricamento sottoscrizioni...</span>
+                      </div>
+                    ) : (
+                      <SubscriptionsTable subs={subscriptions} />
+                    )}
                   </div>
                 </Card.Body>
               </Card>

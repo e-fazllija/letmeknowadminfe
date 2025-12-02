@@ -136,6 +136,21 @@ export async function getClient(id: string): Promise<Client> {
   return data
 }
 
+export async function getClientSubscriptions(clientId: string): Promise<Subscription[]> {
+  try {
+    const { data } = await api.get<Subscription[]>(
+      `/platform/clients/${clientId}/subscriptions`,
+    )
+    return data.map((sub) => ({
+      ...sub,
+      amount: typeof sub.amount === 'string' ? parseFloat(sub.amount) : sub.amount,
+    }))
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || err?.message || 'Errore sottoscrizioni'
+    throw new Error(msg)
+  }
+}
+
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY)
 }
