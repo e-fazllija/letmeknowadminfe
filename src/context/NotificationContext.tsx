@@ -74,6 +74,7 @@ function persistSnapshot(snapshot: Record<string, string>) {
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading: authLoading } = useAuth()
   const seenRef = useRef<Set<string>>(readSeenNotifications())
+  const lastRefreshRef = useRef<number>(0)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -120,6 +121,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated || authLoading) return
+    const now = Date.now()
+    if (loading || now - lastRefreshRef.current < 30000) return
+    lastRefreshRef.current = now
     setLoading(true)
     try {
       const data = await fetchNotifications()
@@ -150,7 +154,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     let timer: ReturnType<typeof setInterval> | undefined
     refresh()
-    timer = setInterval(refresh, 45000)
+    timer = setInterval(refresh, 30000)
     return () => {
       if (timer) clearInterval(timer)
     }
