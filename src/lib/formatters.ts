@@ -39,18 +39,21 @@ export function formatPaymentMethod(method?: string) {
 }
 
 export function resolveSubscriptionMethod(sub: {
-  method?: string
+  method?: string | null
   paymentMethod?: string
   payment?: { method?: string; paymentMethod?: string }
   payments?: { method?: string; paymentMethod?: string }[]
+  lastPayment?: { method?: string; paymentMethod?: string } | null
 }) {
   return (
-    sub.paymentMethod ||
     sub.method ||
-    sub.payment?.paymentMethod ||
+    sub.paymentMethod ||
+    sub.lastPayment?.method ||
+    sub.lastPayment?.paymentMethod ||
     sub.payment?.method ||
-    sub.payments?.find((p) => p.paymentMethod || p.method)?.paymentMethod ||
-    sub.payments?.find((p) => p.paymentMethod || p.method)?.method
+    sub.payment?.paymentMethod ||
+    sub.payments?.find((p) => p.method || p.paymentMethod)?.method ||
+    sub.payments?.find((p) => p.method || p.paymentMethod)?.paymentMethod
   )
 }
 

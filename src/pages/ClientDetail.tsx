@@ -355,6 +355,7 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
           <th>Contratto</th>
           <th>Metodo</th>
           <th>Stato</th>
+          <th>Prossima fatturazione</th>
           <th>Inizio Contratto</th>
           <th>Fine contratto</th>
           <th>Creato il</th>
@@ -369,6 +370,7 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
             <td>{formatContractTerm(s.contractTerm)}</td>
             <td>{formatPaymentMethod(resolveSubscriptionMethod(s))}</td>
             <td><StatusBadge status={s.status} /></td>
+            <td>{s.nextBillingAt ? new Date(s.nextBillingAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
             <td>{s.endsAt ? new Date(s.endsAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.createdAt).toLocaleDateString()}</td>

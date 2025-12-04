@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import StatusBadge from '../components/StatusBadge'
 import { getClients } from '../lib/api'
-import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, resolveSubscriptionMethod } from '../lib/formatters'
+import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
 import logo from '@/assets/logo-superuser.svg'
 import { useNotifications } from '@/context/NotificationContext'
@@ -287,6 +287,7 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
           <th>Contratto</th>
           <th>Metodo</th>
           <th>Stato</th>
+          <th>Prossima fatturazione</th>
           <th>Inizio Contratto</th>
           <th>Fine contratto</th>
         </tr>
@@ -297,8 +298,9 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
             <td>{formatAmount(s.amount)}</td>
             <td>{s.currency}</td>
             <td>{formatContractTerm(s.contractTerm)}</td>
-            <td>{formatPaymentMethod(resolveSubscriptionMethod(s))}</td>
+            <td>{formatPaymentMethod(s.method || s.paymentMethod)}</td>
             <td><StatusBadge status={s.status} /></td>
+            <td>{s.nextBillingAt ? new Date(s.nextBillingAt).toLocaleDateString() : '-'}</td>
             <td>{new Date(s.startsAt).toLocaleDateString()}</td>
             <td>{s.endsAt ? new Date(s.endsAt).toLocaleDateString() : '-'}</td>
           </tr>

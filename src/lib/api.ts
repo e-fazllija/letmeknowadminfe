@@ -17,14 +17,15 @@ export interface Subscription {
   currency: string
   billingCycle: string
   contractTerm: string
-  method?: string
+  method?: string | null
   paymentMethod?: string
   payment?: { method?: string; paymentMethod?: string }
   payments?: { method?: string; paymentMethod?: string }[]
+  lastPayment?: { method?: string; paymentMethod?: string } | null
   status: 'ACTIVE' | 'TRIALING' | 'PENDING_PAYMENT' | 'PAST_DUE' | 'CANCELED' | 'EXPIRED'
   startsAt: string
   endsAt?: string
-  nextBillingAt?: string
+  nextBillingAt?: string | null
   trialEndsAt?: string
   canceledAt?: string
   createdAt: string
