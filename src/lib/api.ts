@@ -1,6 +1,20 @@
 import axios from 'axios'
 
+const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL as string | undefined
+const PROD = (import.meta as any).env?.PROD
+
+const BASE = (RAW_BASE ?? '').replace(/\/+$/, '')
+
+if (!BASE && PROD) {
+  throw new Error(
+    '[config] VITE_API_BASE_URL is required in production builds for SuperUser FE',
+  )
+}
+
+const baseURL = BASE || '/v1'
+
 export const TOKEN_KEY = 'lmw_platform_token'
+
 
 export interface UserClaims {
   sub: string
@@ -86,8 +100,9 @@ export interface NotificationItem {
 }
 
 export const api = axios.create({
-  baseURL: '/v1',
+  baseURL,
 })
+
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY)
