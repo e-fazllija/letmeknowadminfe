@@ -5,12 +5,18 @@
   --ink-700: #1f2937;
   --ink-500: #475569;
   --ink-300: #e2e8f0;
-  --brand-700: #0f766e;
-  --brand-500: #14b8a6;
-  --brand-100: #e7f7f5;
-  --accent-amber: #f59e0b;
+  --brand-700: #24315f;
+  --brand-500: #3a4b86;
+  --brand-300: #a0b0e0;
+  --brand-100: #e7ecfa;
+  --brand-50: #f6f8ff;
+  --accent-vista: #90a0d0;
+  --accent-amber: #f08010;
+  --bs-primary: var(--brand-700);
+  --bs-secondary: var(--accent-vista);
+  --bs-warning: var(--accent-amber);
   --surface: #ffffff;
-  --surface-muted: #f8fafc;
+  --surface-muted: var(--brand-50);
   --card-radius: 18px;
   --shadow-soft: 0 18px 48px rgba(15, 23, 42, 0.12);
   --shadow-quiet: 0 4px 20px rgba(15, 23, 42, 0.06);
@@ -27,9 +33,9 @@ body {
   font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--ink-900);
   background:
-    radial-gradient(circle at 20% 20%, rgba(20, 184, 166, 0.12), transparent 28%),
-    radial-gradient(circle at 80% -10%, rgba(59, 130, 246, 0.12), transparent 32%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    radial-gradient(circle at 14% 10%, rgba(144, 160, 208, 0.38), transparent 56%),
+    radial-gradient(circle at 92% -12%, rgba(240, 128, 16, 0.1), transparent 44%),
+    linear-gradient(180deg, #ffffff 0%, var(--brand-50) 52%, rgba(144, 160, 208, 0.18) 100%);
   min-height: 100vh;
   letter-spacing: -0.01em;
 }
@@ -44,6 +50,29 @@ a:hover {
   text-decoration: none;
 }
 
+.btn-dark {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.btn-dark:hover,
+.btn-dark:focus {
+  background: #1a2346;
+  border-color: #1a2346;
+}
+
+.btn-outline-dark {
+  color: var(--brand-700);
+  border-color: rgba(36, 49, 95, 0.35);
+}
+
+.btn-outline-dark:hover,
+.btn-outline-dark:focus {
+  background: var(--brand-700);
+  border-color: var(--brand-700);
+  color: #fff;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -52,11 +81,9 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 1030;
-  background:
-    radial-gradient(circle at 16% 18%, rgba(226, 252, 247, 0.28), rgba(20, 184, 166, 0.12)),
-    linear-gradient(135deg, #0f172a 0%, #0f766e 55%, #14b8a6 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.32);
+  background: linear-gradient(90deg, #f8f9ff 0%, #eef2fb 45%, #d9e0f4 100%);
+  border-bottom: 1px solid rgba(36, 49, 95, 0.1);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
 }
 
 
@@ -80,35 +107,35 @@ a:hover {
 
 .app-header .brand-link,
 .app-header .brand-link:hover {
-  color: #fff;
+  color: var(--brand-700);
 }
 
 .app-header .brand-eyebrow {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--ink-500);
 }
 
 .app-header .brand-title {
-  color: #fff;
+  color: var(--ink-900);
 }
 
 .app-header .brand-avatar {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+  background: rgba(160, 176, 224, 0.2);
+  border-color: rgba(36, 49, 95, 0.22);
+  box-shadow: 0 8px 18px rgba(36, 49, 95, 0.18);
 }
 
 .header-icon-btn {
   padding: 6px 12px;
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  color: var(--brand-700);
+  border-color: rgba(36, 49, 95, 0.2);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 6px 16px rgba(36, 49, 95, 0.18);
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .header-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: #fff;
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(36, 49, 95, 0.45);
   transform: translateY(-1px);
 }
 
@@ -168,7 +195,7 @@ a:hover {
   height: 8px;
   border-radius: 999px;
   background: var(--accent-amber);
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 4px rgba(240, 128, 16, 0.2);
 }
 
 .row-notif-dot {
@@ -177,7 +204,7 @@ a:hover {
   height: 10px;
   border-radius: 999px;
   background: var(--accent-amber);
-  box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 5px rgba(240, 128, 16, 0.2);
   margin-right: 8px;
 }
 
@@ -235,8 +262,8 @@ a:hover {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: var(--brand-500);
-  box-shadow: 0 0 0 6px rgba(20, 184, 166, 0.14);
+  background: var(--brand-700);
+  box-shadow: 0 0 0 6px rgba(144, 160, 208, 0.2);
 }
 
 .page-shell {
@@ -244,13 +271,36 @@ a:hover {
 }
 
 .page-hero {
-  background: linear-gradient(125deg, rgba(20, 184, 166, 0.16), rgba(59, 130, 246, 0.12));
-  border: 1px solid #dfe7f3;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.7), transparent 52%),
+    radial-gradient(circle at 92% 0%, rgba(240, 128, 16, 0.12), transparent 44%),
+    linear-gradient(135deg, rgba(160, 176, 224, 0.98) 0%, rgba(255, 255, 255, 0.98) 64%, rgba(144, 160, 208, 0.82) 100%);
+  border: 1px solid rgba(36, 49, 95, 0.1);
   border-radius: 22px;
   padding: 16px 18px;
   box-shadow: var(--shadow-quiet);
+  color: var(--brand-700);
 }
 
+.page-hero--primary {
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.7), transparent 52%),
+    radial-gradient(circle at 92% 0%, rgba(240, 128, 16, 0.12), transparent 44%),
+    linear-gradient(135deg, rgba(160, 176, 224, 0.98) 0%, rgba(255, 255, 255, 0.98) 64%, rgba(144, 160, 208, 0.82) 100%);
+  border-color: rgba(36, 49, 95, 0.1);
+  color: var(--brand-700);
+}
+
+.page-hero--primary .btn-dark {
+  background: var(--accent-amber);
+  border-color: var(--accent-amber);
+}
+
+.page-hero--primary .btn-dark:hover,
+.page-hero--primary .btn-dark:focus {
+  background: #d8690f;
+  border-color: #d8690f;
+}
 
 
 .page-hero h3 {
@@ -308,6 +358,10 @@ a:hover {
   margin-bottom: 0;
 }
 
+.table-light {
+  --bs-table-bg: var(--brand-50);
+}
+
 .table th {
   color: var(--ink-700);
   border-bottom-color: var(--ink-300);
@@ -318,7 +372,7 @@ a:hover {
 }
 
 .table-hover tbody tr:hover {
-  background-color: #f6f9fd;
+  background-color: var(--brand-50);
 }
 
 .status-pill {
@@ -354,14 +408,19 @@ a:hover {
 .status-pill-secondary {
   color: #334155;
   border-color: #e2e8f0;
-  background: #f8fafc;
+  background: var(--brand-50);
 }
 
 .auth-hero {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 24px 0;
+  padding: 32px 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(144, 160, 208, 0.38), transparent 56%),
+    radial-gradient(circle at 92% -12%, rgba(240, 128, 16, 0.1), transparent 44%),
+    linear-gradient(180deg, #ffffff 0%, var(--brand-50) 52%, rgba(144, 160, 208, 0.18) 100%);
 }
 
 .auth-shell {
@@ -372,12 +431,19 @@ a:hover {
   background: #fff;
 }
 
+.auth-shell > .row {
+  align-items: stretch;
+}
+
 .auth-hero-pane {
   position: relative;
   height: 100%;
-  color: #fff;
-  background: radial-gradient(circle at 20% 20%, rgba(226, 252, 247, 0.14), rgba(20, 184, 166, 0.85)),
-    linear-gradient(135deg, #0f172a, #0f766e);
+  min-height: 100%;
+  color: var(--brand-700);
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.7), transparent 52%),
+    radial-gradient(circle at 92% 0%, rgba(240, 128, 16, 0.12), transparent 44%),
+    linear-gradient(135deg, rgba(160, 176, 224, 0.98) 0%, rgba(255, 255, 255, 0.98) 64%, rgba(144, 160, 208, 0.82) 100%);
   padding: 32px;
 }
 
@@ -386,7 +452,7 @@ a:hover {
   position: absolute;
   inset: 10px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(36, 49, 95, 0.1);
 }
 
 .auth-hero-pane > * {
@@ -407,15 +473,27 @@ a:hover {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  color: #e2e8f0;
+  color: var(--brand-700);
 }
 
 .auth-bullet span {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.15);
+  background: #fff;
+  box-shadow: 0 0 0 6px rgba(144, 160, 208, 0.2);
+}
+
+.auth-hero .btn-dark {
+  border-radius: 999px;
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.auth-hero .btn-dark:hover,
+.auth-hero .btn-dark:focus {
+  background: #1a2346;
+  border-color: #1a2346;
 }
 
 .auth-card-title {

@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Card, Col, Container, Form, Row } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import logo from '@/assets/logo-superuser.svg'
-import logoDark from '@/assets/logo-transparent-dark.png'
+import logo from '@/assets/Logo_Letmeknow_Scuro.png'
 
 export default function Login() {
   const { login } = useAuth()
@@ -34,10 +33,10 @@ export default function Login() {
         <Row className="justify-content-center">
           <Col lg={10}>
             <Card className="auth-shell border-0">
-              <Row className="g-0">
-                <Col lg={5} className="d-none d-lg-flex flex-column justify-content-between auth-hero-pane">
+              <Row className="g-0 h-100">
+                <Col lg={5} className="d-none d-lg-flex flex-column justify-content-between auth-hero-pane h-100">
                   <div>
-                    <img src={logoDark} alt="LetMeKnow" className="auth-logo mb-4" />
+                    <img src={logo} alt="LetMeKnow" className="auth-logo mb-4" />
                     <p className="mb-3">
                       Gestisci clienti e abbonamenti in un&apos;unica console sicura.
                     </p>
@@ -48,7 +47,7 @@ export default function Login() {
                     <div className="auth-bullet">
                       <span aria-hidden="true" />
                       Accesso protetto con codice TOTP
-                    </div>
+                    </div> 
                     <div className="auth-bullet">
                       <span aria-hidden="true" />
                       Controllo rapido degli account aziendali

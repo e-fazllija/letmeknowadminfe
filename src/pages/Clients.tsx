@@ -6,7 +6,7 @@ import StatusBadge from '../components/StatusBadge'
 import { getClients } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
-import logo from '@/assets/logo-superuser.svg'
+import logo from '@/assets/Logo_Letmeknow_Scuro.png'
 import { useNotifications } from '@/context/NotificationContext'
 
 type StatusFilter = 'ALL' | Subscription['status']
@@ -104,7 +104,7 @@ export default function Clients() {
       <Header />
       <div className="page-shell">
         <div className="container">
-                    <div className="page-hero mb-3">
+                    <div className="page-hero page-hero--primary mb-3">
             <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap">
               <div>
                 <div className="eyebrow" style={{ letterSpacing: '-0.5px' }}>Intent LetMeKnow</div>

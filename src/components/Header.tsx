@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import NotificationBell from './NotificationBell'
-import logo from '@/assets/logo-superuser.svg'
+import logo from '@/assets/Logo_Letmeknow_Scuro.png'
 
 export default function Header() {
   const { user, logout } = useAuth()
