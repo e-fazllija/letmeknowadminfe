@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Dropdown, Row, Spinner, Table } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
 import Header from '../components/Header'
@@ -6,7 +6,7 @@ import StatusBadge from '../components/StatusBadge'
 import { getClient, getClientInvoices, getClientSubscriptions } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod, formatPaymentStatus, resolveSubscriptionMethod } from '../lib/formatters'
 import type { Client, Invoice, Subscription } from '../lib/api'
-import { useNotifications } from '@/context/NotificationContext'
+import { useNotifications } from '@/context/useNotifications'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -430,3 +430,4 @@ function InvoicesTable({ invoices }: { invoices: Invoice[] }) {
     </Table>
   )
 }
+

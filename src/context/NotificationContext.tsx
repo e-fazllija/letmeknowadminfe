@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import axios from 'axios'
 import {
   getClientInvoices,
   getClients,
@@ -6,20 +7,8 @@ import {
   type Client,
   type NotificationItem,
 } from '@/lib/api'
-import { useAuth } from './AuthContext'
-
-type NotificationContextValue = {
-  notifications: NotificationItem[]
-  hasUnread: boolean
-  seenNotificationIds: Set<string>
-  loading: boolean
-  error: string | null
-  refresh: () => Promise<void>
-  markNotificationsRead: (ids: string[]) => void
-  markAllRead: () => void
-}
-
-const NotificationContext = createContext<NotificationContextValue | undefined>(undefined)
+import { NotificationContext } from './notification-context'
+import { useAuth } from './useAuth'
 const LAST_SEEN_KEY = 'lmw_payment_notifications_seen'
 const SEEN_NOTIFICATIONS_KEY = 'lmw_seen_notifications'
 const LEGACY_SEEN_INVOICES_KEY = 'lmw_seen_invoices'
@@ -71,10 +60,21 @@ function persistSnapshot(snapshot: Record<string, string>) {
   }
 }
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (axios.isAxiosError<{ message?: string }>(err)) {
+    return err.response?.data?.message || err.message || fallback
+  }
+  if (err instanceof Error && err.message) {
+    return err.message
+  }
+  return fallback
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading: authLoading } = useAuth()
   const seenRef = useRef<Set<string>>(readSeenNotifications())
   const lastRefreshRef = useRef<number>(0)
+  const loadingRef = useRef(false)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -87,9 +87,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (useInvoiceFallback) return await fallbackFromInvoices()
     try {
       return await getPaymentNotifications()
-    } catch (err: any) {
-      const status = err?.response?.status || err?.status
-      const msg: string = err?.message || ''
+    } catch (err: unknown) {
+      const status = axios.isAxiosError(err) ? err.response?.status : undefined
+      const msg = getErrorMessage(err, '')
       if (status === 404 || msg.includes('Cannot GET')) {
         setUseInvoiceFallback(true)
         return await fallbackFromInvoices()
@@ -122,8 +122,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (!isAuthenticated || authLoading) return
     const now = Date.now()
-    if (loading || now - lastRefreshRef.current < 30000) return
+    if (loadingRef.current || now - lastRefreshRef.current < 30000) return
     lastRefreshRef.current = now
+    loadingRef.current = true
     setLoading(true)
     try {
       const data = await fetchNotifications()
@@ -139,9 +140,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const unseen = normalized.filter((n) => (n.id ? !seenRef.current.has(n.id) : true))
       setNotifications((prev) => dedupeById([...prev, ...unseen]))
       setError(null)
-    } catch (err: any) {
-      setError(err?.message || 'Errore notifiche')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Errore notifiche'))
     } finally {
+      loadingRef.current = false
       setLoading(false)
     }
   }, [authLoading, isAuthenticated, fetchNotifications, clientSnapshot])
@@ -152,11 +154,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    let timer: ReturnType<typeof setInterval> | undefined
     refresh()
-    timer = setInterval(refresh, 30000)
+    const timer = setInterval(refresh, 30000)
     return () => {
-      if (timer) clearInterval(timer)
+      clearInterval(timer)
     }
   }, [refresh, isAuthenticated, authLoading])
 
@@ -199,12 +200,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
-}
-
-export function useNotifications() {
-  const ctx = useContext(NotificationContext)
-  if (!ctx) throw new Error('useNotifications must be used within NotificationProvider')
-  return ctx
 }
 
 async function fallbackFromInvoices(limit = 10): Promise<NotificationItem[]> {

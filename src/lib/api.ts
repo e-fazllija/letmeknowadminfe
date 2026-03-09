@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL as string | undefined
-const PROD = (import.meta as any).env?.PROD
+const RAW_BASE = import.meta.env.VITE_API_BASE_URL
+const PROD = import.meta.env.PROD
 
 const BASE = (RAW_BASE ?? '').replace(/\/+$/, '')
 
@@ -15,6 +15,15 @@ const baseURL = BASE || '/v1'
 
 export const TOKEN_KEY = 'lmw_platform_token'
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (axios.isAxiosError<{ message?: string }>(err)) {
+    return err.response?.data?.message || err.message || fallback
+  }
+  if (err instanceof Error && err.message) {
+    return err.message
+  }
+  return fallback
+}
 
 export interface UserClaims {
   sub: string
@@ -126,9 +135,8 @@ export async function login(params: {
     const token = data.accessToken
     localStorage.setItem(TOKEN_KEY, token)
     return token
-  } catch (err: any) {
-    const msg = err?.response?.data?.message || err?.message || 'Errore login'
-    throw new Error(msg)
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, 'Errore login'))
   }
 }
 
@@ -136,9 +144,8 @@ export async function me(): Promise<UserClaims> {
   try {
     const { data } = await api.get<{ user: UserClaims }>(`/platform/auth/me`)
     return data.user
-  } catch (err: any) {
-    const msg = err?.response?.data?.message || 'Errore autenticazione'
-    throw new Error(msg)
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, 'Errore autenticazione'))
   }
 }
 
@@ -161,9 +168,8 @@ export async function getClientSubscriptions(clientId: string): Promise<Subscrip
       ...sub,
       amount: typeof sub.amount === 'string' ? parseFloat(sub.amount) : sub.amount,
     }))
-  } catch (err: any) {
-    const msg = err?.response?.data?.message || err?.message || 'Errore sottoscrizioni'
-    throw new Error(msg)
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, 'Errore sottoscrizioni'))
   }
 }
 
@@ -183,9 +189,8 @@ export async function getClientInvoices(clientId: string): Promise<Invoice[]> {
           ? parseFloat(inv.amount)
           : (inv.amount as number),
     }))
-  } catch (err: any) {
-    const msg = err?.response?.data?.message || err?.message || 'Errore fatture'
-    throw new Error(msg)
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, 'Errore fatture'))
   }
 }
 
@@ -200,9 +205,8 @@ export async function getPaymentNotifications(limit = 10): Promise<NotificationI
       amount: typeof n.amount === 'string' ? parseFloat(n.amount) : n.amount,
       kind: n.kind || 'PAYMENT',
     }))
-  } catch (err: any) {
-    const msg = err?.response?.data?.message || err?.message || 'Errore notifiche'
-    throw new Error(msg)
+  } catch (err: unknown) {
+    throw new Error(getErrorMessage(err, 'Errore notifiche'))
   }
 }
 

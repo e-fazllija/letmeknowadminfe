@@ -1,4 +1,4 @@
-﻿import { Fragment, useEffect, useMemo, useState } from 'react'
+﻿import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Row, Spinner, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
@@ -7,7 +7,7 @@ import { getClients } from '../lib/api'
 import { formatAmount, formatContractTerm, formatEmployeeRange, formatPaymentMethod } from '../lib/formatters'
 import type { Client, Subscription } from '../lib/api'
 import logo from '@/assets/Logo_Letmeknow_Scuro.png'
-import { useNotifications } from '@/context/NotificationContext'
+import { useNotifications } from '@/context/useNotifications'
 
 type StatusFilter = 'ALL' | Subscription['status']
 type InvoiceStatus = 'DA_FATTURARE' | 'FATTURATO'
@@ -65,7 +65,10 @@ export default function Clients() {
     })
   }, [clients])
 
-  const getInvoiceStatus = (id: string): InvoiceStatus => invoiceStatus[id] || 'DA_FATTURARE'
+  const getInvoiceStatus = useCallback(
+    (id: string): InvoiceStatus => invoiceStatus[id] || 'DA_FATTURARE',
+    [invoiceStatus],
+  )
   const updateInvoiceStatus = (id: string, value: InvoiceStatus) => {
     setInvoiceStatus((prev) => {
       const next = { ...prev, [id]: value }
@@ -93,7 +96,7 @@ export default function Clients() {
     const pending = clients.filter((c) => c.subscriptions.some((s) => s.status === 'PENDING_PAYMENT')).length
     const toBill = clients.filter((c) => getInvoiceStatus(c.id) === 'DA_FATTURARE').length
     return { total, active, pending, toBill }
-  }, [clients, invoiceStatus])
+  }, [clients, getInvoiceStatus])
 
   const notificationClientIds = useMemo(() => new Set(notifications.map((n) => n.clientId)), [notifications])
 
@@ -309,6 +312,7 @@ function SubscriptionsTable({ subs }: { subs: Subscription[] }) {
     </Table>
   )
 }
+
 
 
 

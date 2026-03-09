@@ -1,6 +1,6 @@
-import { Dropdown, Spinner } from 'react-bootstrap'
+﻿import { Dropdown, Spinner } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
-import { useNotifications } from '@/context/NotificationContext'
+import { useNotifications } from '@/context/useNotifications'
 import { formatAmount } from '@/lib/formatters'
 
 export default function NotificationBell() {
@@ -67,7 +67,7 @@ export default function NotificationBell() {
                   <>
                     <div className="notif-meta">
                       <span>{formatAmount(n.amount)} {n.currency}</span>
-                      <span aria-hidden="true">•</span>
+                      <span aria-hidden="true">â€¢</span>
                       <span>{new Date(n.createdAt).toLocaleString()}</span>
                     </div>
                     {n.invoiceNumber && (
@@ -78,7 +78,7 @@ export default function NotificationBell() {
                 {n.kind === 'CLIENT_UPDATE' && (
                   <div className="notif-meta">
                     <span>Dati contatto/fatturazione aggiornati</span>
-                    <span aria-hidden="true">•</span>
+                    <span aria-hidden="true">â€¢</span>
                     <span>{new Date(n.createdAt).toLocaleString()}</span>
                   </div>
                 )}
@@ -90,3 +90,4 @@ export default function NotificationBell() {
     </Dropdown>
   )
 }
+

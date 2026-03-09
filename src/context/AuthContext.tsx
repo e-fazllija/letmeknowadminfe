@@ -1,18 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { TOKEN_KEY, clearToken, login as apiLogin, me } from '../lib/api'
 import type { UserClaims } from '../lib/api'
-
-type AuthContextValue = {
-  user: UserClaims | null
-  token: string | null
-  isAuthenticated: boolean
-  loading: boolean
-  login: (email: string, password: string, code: string) => Promise<void>
-  refresh: () => Promise<void>
-  logout: () => void
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+import { AuthContext, type AuthContextValue } from './auth-context'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
@@ -68,10 +57,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
 }

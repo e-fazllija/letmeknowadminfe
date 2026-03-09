@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, Card, Col, Container, Form, Row } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import logo from '@/assets/Logo_Letmeknow_Scuro.png'
 
 export default function Login() {
@@ -20,8 +20,8 @@ export default function Login() {
     try {
       await login(email.trim(), password, code.trim())
       navigate('/clients', { replace: true })
-    } catch (err: any) {
-      setError(err?.message || 'Credenziali non valide')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Credenziali non valide')
     } finally {
       setLoading(false)
     }
